@@ -62,7 +62,7 @@ void RedBlackTree::insert(Node* node, Node* parent, direction dir) {
   *  (Conclusion) If a node N has exactly one child, the child must be red, because if it were black, its leaves would sit at a different black depth than N's child, violating requirement 4.
    * /
 
-  //Do the actual condition logic
+  //Do the actual condition logic (see images on wikipedia)
   /*
     6 conditions
     1: if the parent color is black, every requirement holds so we don't need to do anything
