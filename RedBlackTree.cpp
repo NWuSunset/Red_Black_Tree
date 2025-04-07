@@ -38,31 +38,55 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
 
 // Corrected method definitions
 void RedBlackTree::insert(Node* node, Node* parent, direction dir) {
-  // Implementation for inserting a node
-  Node* grandparent = nullptr;
-  Node* uncle = nullptr;
 
-  if (parent = nullptr) {
+
+  if (parent == nullptr) {
     root = node; //if there aren't any other nodes in the tree then this node is root
     return;
   }
-  //Else, check which side this node is on
-  if (parent->data < node->data) {
-    parent->right = node;
-  } else {
-    parent->left = node;
-  }
 
 
+  Node* grandparent = parent->parent;
+  Node* uncle = nullptr;
+
+  parent->setChild(dir, node); //update the parent's child to passed in node
+
+  //Now do the balancing
+
+  /*
+   * Requirements:
+  *  1 Every node is either red or black
+  *  2 All null nodes  are considered black.
+  *  3 A red node does not have a red child.
+  *  4 Every path from a given node to any of its leaf nodes goes through the same number of black nodes.
+  *  (Conclusion) If a node N has exactly one child, the child must be red, because if it were black, its leaves would sit at a different black depth than N's child, violating requirement 4.
+   * /
 
   //Do the actual condition logic
   /*
     6 conditions
-    1: 
+    1: if the parent color is black, every requirement holds so we don't need to do anything
+    2: if parent or uncle are red, both become black and grandparent becomes red (maintains requirement 4).
+       since any path through parent/uncle passes through grandparent # of black nodes doesn't change.
+       Grandparent now violates req 3 if it has a red parent, so one must set grandparent = passed in node
+    3: Insert case 2 has happened enoguh times where the heigh of the tree is now 1 greater, t
+       this makes passed in node the red root, meaning all requirements are valid (don't have to change anything)
+    4. Parent is red and root, passed in node is default red, but we can just change root color to have a valid tree
+    5. Parent is Red, uncle is black. We want to rotate parent node to grandparent position.
+       This won't work if passed in Node is inner grandchild of grandparent (N is left child of right child of grandparent or right child of left child)
+       We need to rotate the parent of the passed in Node (by direction dir (which is the direction Node is passed in on) to switch Node and it's parent,
+       both the Parent and Node will be red so req 4 is fine.
+       Requirment 3 will need further correction (case 6)
+    6. Passed in Node is now outer grandchild (left of left child or right of right child of grandparent).
+       Now rotating grandparent by opposite direction of where the passed in Node went (dir) will make the Parent in the grandparent's position
+       and make parent the parent of the passed in node AND the grandparent node. The grandparent node will be black and the Parent of it (it's former child) is red
+       Then switching the colors of the Parent and Grandparent fixes requirement 3.
+       Req 4 is still fine since all paths that went through the grandparent (which was black) now go through the parent (which is now black).
   */
 
-  balanceInsert(node, dir);
-  
+
+  //recursion or iteration....
+
 
 }
 
