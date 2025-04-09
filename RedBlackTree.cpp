@@ -16,7 +16,7 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
 
   //swap the dir child of the subRoot and newRoot
   Node* newChild = newRoot->child(dir);
-  subRoot->setChild(1 - dir, newChild);
+  subRoot->setChild(1 - dir, newChild); 
 
   //update parents
   if (newChild != nullptr) { //for newChild
@@ -94,7 +94,7 @@ void RedBlackTree::insert(Node* node, direction dir) {
        Grandparent now violates req 3 if it has a red parent, so one must set grandparent = passed in node
     3: Insert case 2 has happened enoguh times where the heigh of the tree is now 1 greater, t
        this makes passed in node the red root, meaning all requirements are valid (don't have to change anything)
-    4. Parent is red and root, passed in node is default red, but we can just change root color to have a valid tree
+    4. Parent is red and is root, passed in node is default red, but we can just change root color to have a valid tree
     5. Parent is Red, uncle is black. We want to rotate parent node to grandparent position.
        This won't work if passed in Node is inner grandchild of grandparent (N is left child of right child of grandparent or right child of left child)
        We need to rotate the parent of the passed in Node (by direction dir (which is the direction Node is passed in on) to switch Node and it's parent,
@@ -109,26 +109,63 @@ void RedBlackTree::insert(Node* node, direction dir) {
 
 
   //recursion or iteration....
-
-  while (parent->color == RED) {
-    if (parent == grandparent->left) {
-      //Case #1:
-      if (grandparent->right->color == RED) {
-	grandparent->right->color = BLACK;
-	grandparent->left->color = BLACK;
-	grandparent->color = RED;
-
-	node = grandparent;
-      } else if (node = parent->right) { //Case #2:
-	
-      }
-      
+  do {
+    //Case 1
+    if (parent->color == black) {
+      return; //requirements hold
+    }
 
 
+
+    dir = (parent == grandparent->right) ? right : left; //direction of parent
+    uncle = grandparent->child(1 - dir); //opposite parent direction
+
+    //since we assume null is black
+    if (uncle != nullptr || uncle->color == BLACK) {
       
     }
-  }
- 
+
+    //i can move these cases down here for simplicity
+    //!!check if parent is red
+    //case 2 (if parent or uncle are red), if parent is red then 
+    if (parent->color == RED || uncle->color == RED) {
+      parent->color == BLACK;
+      uncle->color == BLACK;
+      grandparent->color = RED;
+      node = grandparent; //fixes grandparent violating req 3 if it has a red parent
+    }
+
+    //case 3 (if case 2 has happened enough for height to increase)
+    return; //then every requirement is met
+
+    //case 4 (if red and root)
+    if (parent->color == RED && grandparent == nullptr) {
+      parent->color = BLACK; //switch root color
+      return;
+    }
+
+    //Case 5
+    if ((uncle == nullptr || uncle->color == BLACK) && parent->color == RED) {
+      //Check if inner child
+      if (node == parent->child(1-dir)) {
+
+      rotateSubTree(parent, dir); //rotate parent to grandparent position (dir is the direction parent is in relative to grandparent).
+
+      //then swap node and parent again
+      node = parent; 
+      parent = grandparent->child[dir];
+      }
+    }
+
+    
+    
+  } while()
+	
+
+      
+
+
+      
 
 }
 
