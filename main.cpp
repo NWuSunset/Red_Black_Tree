@@ -105,7 +105,7 @@ void fromFile(RedBlackTree* rbt) {
     cout << "Inserting numbers into the tree..." << endl;
     cout << "Adding numbers from file" << endl;
     while (inputFile >> num) {
-      rbt->insert(rbt->root, num);
+      rbt->insert(rbt->root, rbt->root, num, num > rbt->root->data);
     }
     inputFile.close();
   } else {
@@ -126,6 +126,6 @@ void fromConsole(RedBlackTree * rbt) {
   cout << "Inserting numbers..." << endl;
   //Stream a number till while space is encountered. Do this until end of string is hit
   while (iss >> num) {
-    rbt->insert(rbt->root, num);
+    rbt->insert(rbt->root, rbt->root, num, num > rbt->root->data); //num == rbt->root->data will give 1 if true (will go right) 
   }
 }

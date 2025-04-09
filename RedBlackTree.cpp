@@ -36,9 +36,32 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
   return newRoot;
 } 
 
-// Corrected method definitions
-void RedBlackTree::insert(Node* node, Node* parent, direction dir) {
+void RedBlackTree::insert(Node* &pos, Node* prev, const int data, direction dir) {
+  if (pos == nullptr) {
+    pos = new Node(data); //this will be the base case of the recursion (will insert once the path has ended)
+    pos->parent = prev; //set parent node
+    insert(pos, dir); //do the actual insert
+  }
+  
+  
+  //if number is already in the tree
+  if (pos->data == data) {
+    std::cout << "Already in the tree" << std::endl;
+    return;
+  } 
+  
+  //if data being inserted is greater than node then go right
+  if (pos->data < data) {
+    insert(pos->right, pos,  data, right);
+  } else if (pos->data > data) { //If data being inserted is less than node go left
+    insert(pos->left, pos, data, left); 
+  }
+}
 
+// Corrected method definitions
+void RedBlackTree::insert(Node* node, direction dir) {
+
+  Node* parent = node->parent;
 
   if (parent == nullptr) {
     root = node; //if there aren't any other nodes in the tree then this node is root
@@ -87,6 +110,25 @@ void RedBlackTree::insert(Node* node, Node* parent, direction dir) {
 
   //recursion or iteration....
 
+  while (parent->color == RED) {
+    if (parent == grandparent->left) {
+      //Case #1:
+      if (grandparent->right->color == RED) {
+	grandparent->right->color = BLACK;
+	grandparent->left->color = BLACK;
+	grandparent->color = RED;
+
+	node = grandparent;
+      } else if (node = parent->right) { //Case #2:
+	
+      }
+      
+
+
+      
+    }
+  }
+ 
 
 }
 
