@@ -10,27 +10,29 @@
 using namespace std;
 /*!
   @brief Handles user input
-  @param bst       the binary search tree
+  @param rbt       the red black tree
   @returns         true if the user inputs the "quit" command
  */
 bool userSelection(RedBlackTree * rbt);
 
 /*!
   @brief Reads in numbers (separated by spaces) from a file and inserts them into binary tree
-  @param bst       the binary search tree
+  @param rbt       the binary search tree
   @note can take in a file path or the name of a file in the local directory e.g. "C:\Users\476275\Downloads\numbers.txt", numbers.txt (if file is in the local program directory).
  */
 void fromFile(RedBlackTree * rbt);
 
 /*!
   @brief Reads in numbers (separated by spaces) from the console and inserts them into binary tree
-  @param bst       the binary search tree
+  @param rbt       the red black tree
  */
 
 void fromConsole(RedBlackTree * rbt);
 
 int main() {
   RedBlackTree * rbt = new RedBlackTree();
+
+  //rbt->insert(rbt->root, nullptr, 3);
 
   while (!userSelection(rbt)) {}
   
@@ -105,7 +107,7 @@ void fromFile(RedBlackTree* rbt) {
     cout << "Inserting numbers into the tree..." << endl;
     cout << "Adding numbers from file" << endl;
     while (inputFile >> num) {
-      rbt->insert(rbt->root, rbt->root, num, num > rbt->root->data);
+      rbt->insert(rbt->root, nullptr, num);
     }
     inputFile.close();
   } else {
@@ -126,6 +128,6 @@ void fromConsole(RedBlackTree * rbt) {
   cout << "Inserting numbers..." << endl;
   //Stream a number till while space is encountered. Do this until end of string is hit
   while (iss >> num) {
-    rbt->insert(rbt->root, rbt->root, num, num > rbt->root->data); //num == rbt->root->data will give 1 if true (will go right) 
+    rbt->insert(rbt->root, nullptr, num); //num == rbt->root->data will give 1 if true (will go right)
   }
 }

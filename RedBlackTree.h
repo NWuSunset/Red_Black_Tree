@@ -22,7 +22,7 @@ struct Node {
   Node* parent = nullptr;
   Color color = RED; //nodes start as color red
 
-  Node* Node(int data) {
+  explicit Node(const int data) {
     this->data = data;
   }
   
@@ -47,11 +47,10 @@ class RedBlackTree {
 
   Node* rotateSubTree(Node* subRoot, direction dir); //rotates the tree in a direction
 
-  void insert(Node* &pos, Node* prev, int data, direction dir); //for outside calling of the function (goes to end of tree)
+  void insert(Node* &pos, Node* prev, int data, direction dir = right); //for outside calling of the function (goes to end of tree)
   void insert(Node* node, direction dir); //for inside class calling (actually does most of the logic)
-  void balance(Node* Node);
   void remove(Node* rem);
-  void print(Node* pos);
+  void print(const Node* pos , int depth = 0, bool isRight = false);
   Node* getNode(Node* pos, int data);
 
   ~RedBlackTree();
