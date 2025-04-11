@@ -74,14 +74,14 @@ void RedBlackTree::insert(Node* node, direction dir) {
   Node* parent = node->parent;
   
   if (parent == nullptr) {
-    //node->color = BLACK;
+    node->color = BLACK;
     root = node; //if there aren't any other nodes in the tree then this node is root
     return;
   }
 
 
-    Node* grandparent = parent->parent;
-    Node* uncle = nullptr;
+  Node* grandparent = parent->parent;
+  Node* uncle = nullptr;
 
     parent->setChild(dir, node); //update the parent's child to passed in node
 
@@ -99,7 +99,8 @@ void RedBlackTree::insert(Node* node, direction dir) {
 
     //recursion or iteration....
     do {
-        //Case 1 (requirements are good)
+      grandparent = parent->parent;
+      //Case 1 (requirements are good)
         if (parent->color == BLACK) {
             return; //requirements hold
         }
@@ -111,8 +112,9 @@ void RedBlackTree::insert(Node* node, direction dir) {
         }
 
         //direction now becomes the parent's direction relative to the grandparent (to get uncle and check for inner and outer children)
+
         dir = (parent == grandparent->right) ? right : left; //direction of parent
-        uncle = grandparent->child(1 - dir); //opposite parent direction
+	uncle = grandparent->child(1 - dir); //opposite parent direction
 
         //Case 5: If parent is red but uncle is black, then parent would have a red child (but we can't just swap colors like in case 2)
         if ((uncle == nullptr || uncle->color == BLACK) && parent->color == RED) {
@@ -141,11 +143,15 @@ void RedBlackTree::insert(Node* node, direction dir) {
             uncle->color = BLACK;
             grandparent->color = RED; //this may violate rule 3 if grandparent's parent is red
             node = grandparent; //sets node to grandparent so we can continue checking validity upwards through the tree
+
+	    //grandparent = node->parent->parent;
         }
     }
     while ((parent = node->parent)); //loop while parent is not null (and go up the tree)
 
     //case 3 (if case 2 has happened enough for height to increase) then every requirement is met (we can basically exit function)
+
+    root->color = BLACK; //make sure root is black (wasn't always set befoer)
 }
 
 void RedBlackTree::remove(Node* rem) {
