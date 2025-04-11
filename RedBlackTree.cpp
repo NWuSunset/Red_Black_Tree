@@ -74,7 +74,7 @@ void RedBlackTree::insert(Node* node, direction dir) {
   Node* parent = node->parent;
   
   if (parent == nullptr) {
-    node->color = BLACK;
+    //node->color = BLACK;
     root = node; //if there aren't any other nodes in the tree then this node is root
     return;
   }
@@ -143,7 +143,7 @@ void RedBlackTree::insert(Node* node, direction dir) {
             node = grandparent; //sets node to grandparent so we can continue checking validity upwards through the tree
         }
     }
-    while (node->parent != nullptr); //loop while parent is not null
+    while ((parent = node->parent)); //loop while parent is not null (and go up the tree)
 
     //case 3 (if case 2 has happened enough for height to increase) then every requirement is met (we can basically exit function)
 }
