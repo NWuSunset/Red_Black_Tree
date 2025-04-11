@@ -32,8 +32,13 @@ void fromConsole(RedBlackTree * rbt);
 int main() {
   RedBlackTree * rbt = new RedBlackTree();
 
-  //rbt->insert(rbt->root, nullptr, 3);
+  //rbt->insert(rbt->root, nullptr, 4);
+  //rbt->insert(rbt->root, nullptr, 5);
+  //rbt->insert(rbt->root, nullptr, 6);
+  //rbt->insert(rbt->root, nullptr, 7);
 
+  
+  
   while (!userSelection(rbt)) {}
   
   return 0;

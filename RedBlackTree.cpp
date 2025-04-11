@@ -7,6 +7,7 @@ RedBlackTree::RedBlackTree() = default;
 
 //https://en.wikipedia.org/wiki/Tree_rotation visualization
 //node passed in is the root of the subtree (perhaps rename later
+//direction is the direction to rotate in
 Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
     //Will rotate left or right.
     Node* parent = subRoot->parent; //save original root parent
@@ -15,18 +16,22 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
     //(of the direction passed in, so if we want to rotate left this would be the right child)
     Node* newRoot = subRoot->child(1 - dir);
 
-    //swap the dir child of the subRoot and newRoot
+    //swap the dir child of the subRoot and newRoot (swap rotation direction child over (the 'inner' child))
     Node* newChild = newRoot->child(dir);
     subRoot->setChild(1 - dir, newChild);
-
+    
+    newRoot->setChild(dir, subRoot); //set subRoot as the newRoot's child
+    
     //update parents
     if (newChild != nullptr) {
         //for newChild
         newChild->parent = subRoot;
     }
-    newRoot->setChild(dir, parent); //for newRoot
+    
+    newRoot->parent = parent; //for new root 
     subRoot->parent = newRoot; //for original subRoot
 
+    
     //update the children for parent
     if (parent != nullptr) {
         //if subRoot == parent->right, it evaluates to 1 which is the right direction (since right and left are basically booleans)
@@ -34,7 +39,6 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
     } else {
         root = newRoot;
     }
-
     return newRoot;
 }
 
@@ -67,12 +71,13 @@ void RedBlackTree::insert(Node* & pos, Node* prev, const int data, const directi
 
 // Corrected method definitions
 void RedBlackTree::insert(Node* node, direction dir) {
-    Node* parent = node->parent;
-
-    if (parent == nullptr) {
-        root = node; //if there aren't any other nodes in the tree then this node is root
-        return;
-    }
+  Node* parent = node->parent;
+  
+  if (parent == nullptr) {
+    node->color = BLACK;
+    root = node; //if there aren't any other nodes in the tree then this node is root
+    return;
+  }
 
 
     Node* grandparent = parent->parent;
