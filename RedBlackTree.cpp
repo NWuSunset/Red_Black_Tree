@@ -42,6 +42,15 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
     return newRoot;
 }
 
+//Gets the direction of the node passed in relatvie to it's parent
+direction nodeDirection(Node* node) {
+  if (node == node->parent->right) {
+    return right;
+  } else {
+    return left
+  }
+}
+
 //position initially is the root, prev is initially nullptr
 
 //insert function broken (misses 3 when addding?)
@@ -114,6 +123,7 @@ void RedBlackTree::insert(Node* node, direction dir) {
         //direction now becomes the parent's direction relative to the grandparent (to get uncle and check for inner and outer children)
 
         dir = (parent == grandparent->right) ? right : left; //direction of parent
+	//dir = nodeDirection(parent);
 	uncle = grandparent->child(1 - dir); //opposite parent direction
 
         //Case 5: If parent is red but uncle is black, then parent would have a red child (but we can't just swap colors like in case 2)
@@ -154,8 +164,35 @@ void RedBlackTree::insert(Node* node, direction dir) {
     root->color = BLACK; //make sure root is black (wasn't always set befoer)
 }
 
+//remove traversal
+void RedBlackTree::remove(Node* & pos, Node* prev, const int toRemove, const direction dir) {
+    if (pos->data == toRemove) {
+        remove(pos, dir); //do the actual remove
+        return;
+    }
+
+
+    //if number is already in the tree
+    if (pos->data == data) {
+        std::cout << "Already in the tree" << std::endl;
+        return;
+    }
+
+    //if data being inserted is greater than node then go right
+    if (pos->data < data) {
+        insert(pos->right, pos, data, right);
+    } else if (pos->data > data) {
+        //If data being inserted is less than node go left
+        insert(pos->left, pos, data, left);
+    }
+}
+
+
 void RedBlackTree::remove(Node* rem) {
-    // Implementation for removing a node
+  // Implementation for removing a node
+  Node* sibling = nullptr;
+  Node* inner_nephew = nullptr;
+  Node* outer_newphew = nullptr;
 }
 
 void RedBlackTree::print(const Node* pos , const int depth, bool isRight) {
