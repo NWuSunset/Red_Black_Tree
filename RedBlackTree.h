@@ -46,7 +46,7 @@ class RedBlackTree {
   RedBlackTree();
 
   Node* rotateSubTree(Node* subRoot, direction dir); //rotates the tree in a direction
-  direction nodeDirection(Node* node);
+  direction nodeDirection(Node* node); //helper function, get's node's direction relative to its parent
   
   void insert(Node* &pos, Node* prev, int data, direction dir = right); //for outside calling of the function (goes to end of tree)
   void insert(Node* node, direction dir); //for inside class calling (actually does most of the logic)

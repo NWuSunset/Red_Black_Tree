@@ -122,8 +122,8 @@ void RedBlackTree::insert(Node* node, direction dir) {
 
         //direction now becomes the parent's direction relative to the grandparent (to get uncle and check for inner and outer children)
 
-        dir = (parent == grandparent->right) ? right : left; //direction of parent
-	//dir = nodeDirection(parent);
+	//        dir = (parent == grandparent->right) ? right : left; //direction of parent
+	dir = nodeDirection(parent);
 	uncle = grandparent->child(1 - dir); //opposite parent direction
 
         //Case 5: If parent is red but uncle is black, then parent would have a red child (but we can't just swap colors like in case 2)
@@ -171,28 +171,106 @@ void RedBlackTree::remove(Node* & pos, Node* prev, const int toRemove, const dir
         return;
     }
 
-
-    //if number is already in the tree
-    if (pos->data == data) {
-        std::cout << "Already in the tree" << std::endl;
-        return;
-    }
-
-    //if data being inserted is greater than node then go right
-    if (pos->data < data) {
-        insert(pos->right, pos, data, right);
-    } else if (pos->data > data) {
-        //If data being inserted is less than node go left
-        insert(pos->left, pos, data, left);
+    //if data is greater than node then go right
+    if (pos->data < toRemove) {
+        insert(pos->right, pos, toRemove, right);
+    } else if (pos->data > toRemove) {
+        //If data is less than node go left
+        insert(pos->left, pos, toRemove, left);
     }
 }
 
 
-void RedBlackTree::remove(Node* rem) {
+void RedBlackTree::remove(Node* node) {
   // Implementation for removing a node
+
+  node* parent = node->parent;
+  
+  //Initialize then needed nodes
   Node* sibling = nullptr;
-  Node* inner_nephew = nullptr;
-  Node* outer_newphew = nullptr;
+  Node* close_nephew = nullptr;
+  Node* far_newphew = nullptr;
+
+  direction dir = nodeDirection(node);
+  parent->setChild(dir, nullptr); //set the parents child pointer to null now.
+
+  //now do the balancing
+  /* Loop Follows:
+     -At the start of each iteration the height of "node" in the tree represent the iteration number (minus 1) (so the first iteration is zero)
+     -The number of black nodes on tree paths through "node" is one less than before deletion, but this is unchanged for other paths. This means the parent of "node" has a violation of requirement 4 if other paths exist.
+   */
+
+  do {
+    //update parameters after every iteration (parent is updated in the while loop):
+    dir = nodeDirection(node);
+    sibling = parent->child(dir - 1);
+    close_nephew = sibling->child(dir); //close = same direction
+    far_nephew = sibling->child(dir - 1); //far = opposite direction as node is to it's parent
+
+    //Note: recal that null can also be black (optimize for this, without having such long if statements maybe...)
+    
+    //Case 3: (sibling is red, so nephews and parent must be black). This rotates the tree so that it can be fixed in cases 4,5, or 6
+    if (sibling->color == RED) {
+      //(if node is left of parent rotate left, if it's right, do the opposite)
+      rotateSubTree(parent, dir); //rotate so that the sibling becomes the new parent (or node's grandparent now) 
+      parent->color = RED;
+      sibling->color = BLACK;
+      sibling = close_nephew; //update sibling pointer (since original sibling isn't actually the sibling anymore)
+    } //check if all pointers updated correctly !!!!!!!!!
+
+    //Case 4: Sibling and it's children are black, but parent is red
+    if (sibling->color == BLACK && sibling->right->color == BLACK && sibling->left->color == BLACK && parent->color == RED) {
+      parent->color = BLACK; //switching the colors will add one to the # of black nodes through 'node's' path (since it's parent will now be black), which makes up for the deleted black nodes without altering the # of black nodes through sibling's path.
+      sibling->color = RED;
+
+      return; //after case 4 the tree should be balanced
+    }
+
+    //Case 5: Silbing is black, the close child is red, the far child is black.
+    if (silbing->color == RED && silbing->close_nephew->color == RED && sibling->far_nephew->color == BLACK) {
+      //Rotate sibling opposite of node's direction (relative to parent). Now the close child takes sibling's place.
+      rotateSubTree(sibling, dir - 1);
+
+      //Swap the close child and sibling's colors and update pointer positions
+      sibling->color = RED;
+      close_newphew->color = BLACK;
+      far_newphew = sibling; //sibling would now be in the postiion of node's far nephew
+      sibling = close_nephew; //close_nephew is now the actual sibling
+    }
+    //Now case 5 would move to case 6 to fix the tree
+
+    //Case 6: sibling is black, and it's far child (node's far nephew) is red
+    if (sibling->color == BLACK && far_nephew->color == RED) {
+      rotateSubTree(parent, dir); //rotate parent so that the sibling is now in its original position
+
+      //swap the parent and sibling colors (only happens if parent would be red)
+      sibling->color = parent->color;
+      parent->color = BLACK;
+      
+      far_nephew->color = BLACK; //set the far_nephew color to black
+
+      //Now the subtree still has a root of the same color so requirement 3 is held.
+      //The tree paths not passing through "node" also pass through the same number of black nodes as before, but "node now has an extra black ancestor (since parent was shifted to black, or sibling is added as a black grandparent). This means that paths passing through "node" have an additional black node, which fixes requirement 4 from being violated. 
+      
+      return; //exit loop as the tree should now be balanced after case 6 
+    }
+    
+    //case 1:
+    if (parent == nullptr) {
+      return; //exit if this is the root (tree should be balaced)
+    }
+    
+    //case 2: (if parent, sibling, and sibling's children are black) (req 4 violated)
+    if (parent->color == BLACK &&
+        sibling->color == BLACK &&
+        sibling->left->color == BLACK &&
+        sibling->right->color == BLACK) {
+      sibling->color = RED; //set sibling color to red
+      node = parent; //update the node pointer to become the parent (move up tree by one iteration)
+    }
+
+    
+  } while (parent = node->parent); //update parent every iteration, will stop once parent is null
 }
 
 void RedBlackTree::print(const Node* pos , const int depth, bool isRight) {
