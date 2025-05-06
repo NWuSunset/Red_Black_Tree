@@ -71,7 +71,7 @@ bool userSelection(RedBlackTree* rbt) {
     //get the node that matches user input
     Node* n = rbt->getNode(rbt->root, num);
     if (n != nullptr) {
-      rbt->remove(n);
+      rbt->remove(rbt->root, nullptr, n);
     } else {
     cout << "Invalid number" << endl;
     }

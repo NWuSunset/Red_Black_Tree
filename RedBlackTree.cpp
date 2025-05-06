@@ -43,11 +43,11 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
 }
 
 //Gets the direction of the node passed in relatvie to it's parent
-direction nodeDirection(Node* node) {
+direction RedBlackTree::nodeDirection(Node* node) {
   if (node == node->parent->right) {
     return right;
   } else {
-    return left
+    return left;
   }
 }
 
@@ -58,7 +58,7 @@ void RedBlackTree::insert(Node* & pos, Node* prev, const int data, const directi
     if (pos == nullptr) {
         pos = new Node(data); //this will be the base case of the recursion (will insert once the path has ended)
         pos->parent = prev; //set parent node
-        insert(pos, dir); //do the actual insert
+        insertBalance(pos, dir); //do the actual insert
         return;
     }
 
@@ -79,7 +79,7 @@ void RedBlackTree::insert(Node* & pos, Node* prev, const int data, const directi
 }
 
 // Corrected method definitions
-void RedBlackTree::insert(Node* node, direction dir) {
+void RedBlackTree::insertBalance(Node* node, direction dir) {
   Node* parent = node->parent;
   
   if (parent == nullptr) {
@@ -122,7 +122,7 @@ void RedBlackTree::insert(Node* node, direction dir) {
 
         //direction now becomes the parent's direction relative to the grandparent (to get uncle and check for inner and outer children)
 
-	//        dir = (parent == grandparent->right) ? right : left; //direction of parent
+	//dir = (parent == grandparent->right) ? right : left; //direction of parent (this was working, changed to function for ease of use)
 	dir = nodeDirection(parent);
 	uncle = grandparent->child(1 - dir); //opposite parent direction
 
@@ -165,42 +165,49 @@ void RedBlackTree::insert(Node* node, direction dir) {
 }
 
 //remove traversal
-void RedBlackTree::remove(Node* & pos, Node* prev, const int toRemove, const direction dir) {
-    if (pos->data == toRemove) {
-        remove(pos, dir); //do the actual remove
-        return;
-    }
-
-    //if data is greater than node then go right
-    if (pos->data < toRemove) {
-        insert(pos->right, pos, toRemove, right);
-    } else if (pos->data > toRemove) {
-        //If data is less than node go left
-        insert(pos->left, pos, toRemove, left);
-    }
+void RedBlackTree::remove(Node* & pos, Node* prev, Node* toRemove, const direction dir) {
+  if (pos->data == toRemove->data) {
+    removeBalance(pos); //do the actual remove (check if the pased in thing is correct !!!) (do we remove balance afterwards?)
+    return;
+  }
+  
+  //if data is greater than node then go right
+  if (pos->data < toRemove->data) {
+    remove(pos->right, pos, toRemove, right);
+  } else if (pos->data > toRemove->data) {
+    //If data is less than node go left
+    remove(pos->left, pos, toRemove, left);
+  }
 }
 
 
-void RedBlackTree::remove(Node* node) {
+void RedBlackTree::removeBalance(Node* node) {
   // Implementation for removing a node
 
-  node* parent = node->parent;
+  Node* parent = node->parent;
   
   //Initialize then needed nodes
   Node* sibling = nullptr;
   Node* close_nephew = nullptr;
-  Node* far_newphew = nullptr;
-
-  direction dir = nodeDirection(node);
-  parent->setChild(dir, nullptr); //set the parents child pointer to null now.
-
+  Node* far_nephew = nullptr;
+  direction dir = right; //default direction to right
+  
+  if (parent != nullptr) {
+    dir = nodeDirection(node);
+    parent->setChild(dir, nullptr); //set the parents child pointer to null now.
+  }
   //now do the balancing
   /* Loop Follows:
      -At the start of each iteration the height of "node" in the tree represent the iteration number (minus 1) (so the first iteration is zero)
      -The number of black nodes on tree paths through "node" is one less than before deletion, but this is unchanged for other paths. This means the parent of "node" has a violation of requirement 4 if other paths exist.
-   */
-
+  */
+  
   do {
+    //case 1:
+    if (parent == nullptr) {
+      return; //exit if this is the root (tree should be balaced)
+    }
+    
     //update parameters after every iteration (parent is updated in the while loop):
     dir = nodeDirection(node);
     sibling = parent->child(dir - 1);
@@ -227,14 +234,14 @@ void RedBlackTree::remove(Node* node) {
     }
 
     //Case 5: Silbing is black, the close child is red, the far child is black.
-    if (silbing->color == RED && silbing->close_nephew->color == RED && sibling->far_nephew->color == BLACK) {
+    if (sibling->color == RED && close_nephew->color == RED && far_nephew->color == BLACK) {
       //Rotate sibling opposite of node's direction (relative to parent). Now the close child takes sibling's place.
-      rotateSubTree(sibling, dir - 1);
+      rotateSubTree(sibling, static_cast<direction>(1 - dir));
 
       //Swap the close child and sibling's colors and update pointer positions
       sibling->color = RED;
-      close_newphew->color = BLACK;
-      far_newphew = sibling; //sibling would now be in the postiion of node's far nephew
+      close_nephew->color = BLACK;
+      far_nephew = sibling; //sibling would now be in the postiion of node's far nephew
       sibling = close_nephew; //close_nephew is now the actual sibling
     }
     //Now case 5 would move to case 6 to fix the tree
@@ -253,11 +260,6 @@ void RedBlackTree::remove(Node* node) {
       //The tree paths not passing through "node" also pass through the same number of black nodes as before, but "node now has an extra black ancestor (since parent was shifted to black, or sibling is added as a black grandparent). This means that paths passing through "node" have an additional black node, which fixes requirement 4 from being violated. 
       
       return; //exit loop as the tree should now be balanced after case 6 
-    }
-    
-    //case 1:
-    if (parent == nullptr) {
-      return; //exit if this is the root (tree should be balaced)
     }
     
     //case 2: (if parent, sibling, and sibling's children are black) (req 4 violated)
@@ -299,8 +301,20 @@ void RedBlackTree::print(const Node* pos , const int depth, bool isRight) {
 }
 
 Node* RedBlackTree::getNode(Node* pos, int data) {
-    // Implementation for getting a node
-    return nullptr; // Placeholder
+  // Implementation for getting a node
+  
+  if (pos->data == data) {
+    return pos;
+  }
+  
+  //if data is greater than node then go right
+  if (pos->data < data) {
+    return getNode(pos->right, data);
+    } else if (pos->data > data) {
+    //If data is less than node go left
+    return getNode(pos->left, data);
+  }
+  return nullptr;
 }
 
 // Corrected destructor
