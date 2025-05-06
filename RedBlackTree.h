@@ -46,12 +46,15 @@ class RedBlackTree {
   RedBlackTree();
 
   Node* rotateSubTree(Node* subRoot, direction dir); //rotates the tree in a direction
+  void swapNodes(Node *n1, Node *n2);
+
   direction nodeDirection(Node* node); //helper function, get's node's direction relative to its parent
-  
+  void transplant(Node *u, Node *v);
+
   void insert(Node* &pos, Node* prev, int data, direction dir = right); //for outside calling of the function (goes to end of tree)
   void insertBalance(Node* node, direction dir); //for inside class calling (actually does most of the logic)
 
-  void remove(Node* &pos, Node* prev, Node* toRemove, direction dir = right);
+  void remove(Node *toRemove);
   void removeBalance(Node* node);
   void print(const Node* pos , int depth = 0, bool isRight = false);
   Node* getNode(Node* pos, int data);

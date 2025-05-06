@@ -42,6 +42,7 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
     return newRoot;
 }
 
+
 //Gets the direction of the node passed in relatvie to it's parent
 direction RedBlackTree::nodeDirection(Node* node) {
   if (node == node->parent->right) {
@@ -49,6 +50,24 @@ direction RedBlackTree::nodeDirection(Node* node) {
   } else {
     return left;
   }
+}
+
+//u is the node to be swapped, and v is the node to swap with
+void RedBlackTree::transplant(Node* u, Node* v) {
+    const direction dir = nodeDirection(u); //u's direction relative to parent
+
+    if (u->parent == nullptr) {
+        //u is root
+        root = v;
+    } else if (dir == right) {
+        u->parent->setChild(dir, v);
+    } else {
+        u->parent->setChild(1 - dir, v);
+    }
+
+    if (v != nullptr) {
+        v->parent = u->parent;
+    }
 }
 
 //position initially is the root, prev is initially nullptr
@@ -165,19 +184,46 @@ void RedBlackTree::insertBalance(Node* node, direction dir) {
 }
 
 //remove traversal
-void RedBlackTree::remove(Node* & pos, Node* prev, Node* toRemove, const direction dir) {
-  if (pos->data == toRemove->data) {
-    removeBalance(pos); //do the actual remove (check if the pased in thing is correct !!!) (do we remove balance afterwards?)
-    return;
-  }
-  
-  //if data is greater than node then go right
-  if (pos->data < toRemove->data) {
-    remove(pos->right, pos, toRemove, right);
-  } else if (pos->data > toRemove->data) {
-    //If data is less than node go left
-    remove(pos->left, pos, toRemove, left);
-  }
+void RedBlackTree::remove(Node* toRemove) {
+    //Simple casses:
+    Node* y = toRemove;
+
+    Color y_color_original = y->color;
+
+    Node* N = nullptr;
+
+
+    //Node has 1 null child, then swap with it's child and color it black
+    //Then the single child must be red, and the dleeted node must be black.
+    if (toRemove->right == nullptr) {
+        //swap wi
+        N = toRemove->right;
+        transplant(toRemove, toRemove->right);
+    } else if (toRemove->left == nullptr) {
+    //swap with left
+        N = toRemove->left;
+        transplant(toRemove, toRemove->left);
+    } else {
+        //IF 2 children , swap value with in order sucesssor, and dleete the sucessor instead.
+        y = tree_min(toRemove->right);
+    }
+
+    //Complex case: if to delete node is black and has no actual children (null). In the first iteration, N will be replaced by null
+    if (y_original_color == BLACK && N != NULL) {
+        remove(N); // Call to the Wikipedia rebalancing function
+    }
+
+
+    }
+
+
+}
+
+struct Node* tree_min(struct Node *node) {
+    while (node->left != NULL) {
+        node = node->left;
+    }
+    return node;
 }
 
 
@@ -210,9 +256,9 @@ void RedBlackTree::removeBalance(Node* node) {
     
     //update parameters after every iteration (parent is updated in the while loop):
     dir = nodeDirection(node);
-    sibling = parent->child(dir - 1);
+    sibling = parent->child(1 - dir);
     close_nephew = sibling->child(dir); //close = same direction
-    far_nephew = sibling->child(dir - 1); //far = opposite direction as node is to it's parent
+    far_nephew = sibling->child(1 - dir); //far = opposite direction as node is to it's parent
 
     //Note: recal that null can also be black (optimize for this, without having such long if statements maybe...)
     
