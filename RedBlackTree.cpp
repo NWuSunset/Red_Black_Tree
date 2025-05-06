@@ -54,20 +54,17 @@ direction RedBlackTree::nodeDirection(Node* node) {
 
 //u is the node to be swapped, and v is the node to swap with
 void RedBlackTree::transplant(Node* u, Node* v) {
-    const direction dir = nodeDirection(u); //u's direction relative to parent
-
-    if (u->parent == nullptr) { //if root
-        //u is root
-        root = v;
-    } else if (dir == right) { //if right, swap with right
-        u->parent->setChild(dir, v);
-    } else { //if left swap with left.
-        u->parent->setChild(dir, v);
-    }
-
-    if (v != nullptr) { //update the parents
-        v->parent = u->parent;
-    }
+  if (u->parent == nullptr) { //if root
+    //u is root
+    root = v;
+  } else {
+    const direction dir = nodeDirection(u); //u's direction relative to parent  
+    u->parent->setChild(dir, v); //replace the parent's child u, with v
+  }
+  
+  if (v != nullptr) { //update the parents
+    v->parent = u->parent;
+  }
 }
 
 
@@ -221,7 +218,7 @@ void RedBlackTree::remove(Node* toRemove) {
     N = y;
   }
 
-  if (N->right == nullptr && N->left == nullptr) {
+  if (N != nullptr && N->right == nullptr && N->left == nullptr) {
     if (N == root) {
       delete N;
       root = nullptr;
