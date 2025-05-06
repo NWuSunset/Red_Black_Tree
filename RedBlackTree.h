@@ -50,7 +50,8 @@ class RedBlackTree {
 
   direction nodeDirection(Node* node); //helper function, get's node's direction relative to its parent
   void transplant(Node *u, Node *v);
-
+  Node* tree_min(Node * node);
+  
   void insert(Node* &pos, Node* prev, int data, direction dir = right); //for outside calling of the function (goes to end of tree)
   void insertBalance(Node* node, direction dir); //for inside class calling (actually does most of the logic)
 
