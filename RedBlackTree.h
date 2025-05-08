@@ -49,6 +49,7 @@ class RedBlackTree {
   void swapNodes(Node *n1, Node *n2);
 
   direction nodeDirection(Node* node); //helper function, get's node's direction relative to its parent
+  Color getColor(Node* node);
   void transplant(Node *u, Node *v);
   Node* tree_min(Node * node);
   

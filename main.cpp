@@ -113,8 +113,8 @@ void fromFile(RedBlackTree* rbt) {
     cout << "Adding numbers from file" << endl;
     while (inputFile >> num) {
       rbt->insert(rbt->root, nullptr, num);
-      rbt->print(rbt->root);
-      cout << endl;
+      //      rbt->print(rbt->root);
+      //cout << endl;
     }
     inputFile.close();
   } else {
