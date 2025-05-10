@@ -6,11 +6,11 @@ RedBlackTree::RedBlackTree() = default;
 
 
 //https://en.wikipedia.org/wiki/Tree_rotation visualization
-//node passed in is the root of the subtree (perhaps rename later
+//node passed in is the root of the subtree (perhaps rename a later
 //direction is the direction to rotate in
 Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
     //Will rotate left or right.
-    Node* parent = subRoot->parent; //save original root parent
+    Node* parent = subRoot->parent; //save the original root parent
 
     //New root is now the subRoot's opposite child
     //(of the direction passed in, so if we want to rotate left this would be the right child)
@@ -44,7 +44,12 @@ Node* RedBlackTree::rotateSubTree(Node* subRoot, const direction dir) {
 
 
 //Gets the direction of the node passed in relatvie to it's parent
-direction RedBlackTree::nodeDirection(Node* node) {
+direction RedBlackTree::nodeDirection(const Node* node) {
+  if (node == nullptr || node->parent == nullptr) {
+    std::cout <<  "Node direction error, node or parent is null when calling function" << std::endl;
+    return right; //default to right.
+  }
+
   if (node == node->parent->right) {
     return right;
   } else {
@@ -53,7 +58,7 @@ direction RedBlackTree::nodeDirection(Node* node) {
 }
 
 //basically because nullptr counts as black, use this function
-Color RedBlackTree::getColor(Node* node) {
+Color RedBlackTree::getColor(const Node* node) {
   if (node == nullptr) {
     return BLACK;
   }
@@ -198,7 +203,7 @@ void RedBlackTree::insertBalance(Node* node, direction dir) {
   root->color = BLACK; //make sure root is black (wasn't always set befoer)
 }
 
-//remove traversal
+//remove traversal (add some memory cleanup)
 void RedBlackTree::remove(Node* toRemove) {
   //Simple casses:
   Node* z = toRemove;
@@ -241,7 +246,7 @@ void RedBlackTree::remove(Node* toRemove) {
   }  
 }
 
-
+//add some memory cleanup
 void RedBlackTree::removeBalance(Node* node) {
   // Implementation for removing a node
   
@@ -270,9 +275,10 @@ void RedBlackTree::removeBalance(Node* node) {
     }
     
     //update parameters after every iteration (parent is updated in the while loop):
-    dir = nodeDirection(node);
+    //dir = nodeDirection(node);
     sibling = parent->child(1 - dir);
-    
+
+    //Check if the sibling is null.
     if (sibling != nullptr) {
       close_nephew = sibling->child(dir); //close = same direction
       far_nephew = sibling->child(1 - dir); //far = opposite direction as node is to it's parent
@@ -280,8 +286,23 @@ void RedBlackTree::removeBalance(Node* node) {
       close_nephew = nullptr;
       far_nephew = nullptr;
     }
+
+    //Handle case where silbing is nullptr (working on) (I think this fixed the problem?)
+    if (sibling == nullptr) {
+      //Then this is an unbalance state, go move up the tre
+      Node* current = parent;
+      parent = parent->parent;
+
+      if (parent == nullptr) {
+        return; //if parent is null we have reached the root.
+      }
+
+      //now update a direction for next iteration.
+      dir = nodeDirection(current);
+      continue;
+    }
     
-    //Note: recal that null can also be black (optimize for this, without having such long if statements maybe...)
+    //Note: recall that null can also be black (optimize for this, without having such long if statements maybe...)
     
     //Case 3: (sibling is red, so nephews and parent must be black). This rotates the tree so that it can be fixed in cases 4,5, or 6
     if (getColor(sibling) == RED) {
@@ -293,8 +314,7 @@ void RedBlackTree::removeBalance(Node* node) {
     } //chey;ck if all pointers updated correctly !!!!!!!!!
     
     //Case 4: Sibling and it's children are black, but parent is red (check for null sibling, as that has no children)
-    if (sibling != nullptr &&
-	getColor(sibling) == BLACK && getColor(close_nephew) == BLACK && getColor(far_nephew) == BLACK && parent->color == RED) {
+    if (getColor(sibling) == BLACK && getColor(close_nephew) == BLACK && getColor(far_nephew) == BLACK && parent->color == RED) {
       
       parent->color = BLACK; //switching the colors will add one to the # of black nodes through 'node's' path (since it's parent will now be black), which makes up for the deleted black nodes without altering the # of black nodes through sibling's path.
       sibling->color = RED;
@@ -303,7 +323,7 @@ void RedBlackTree::removeBalance(Node* node) {
     }
     
     //Case 5: Silbing is black, the close child is red, the far child is black.
-    if (getColor(sibling) == RED && getColor(close_nephew) == RED && getColor(far_nephew) == BLACK) {
+    if (getColor(sibling) == BLACK && getColor(close_nephew) == RED && getColor(far_nephew) == BLACK) {
       //Rotate sibling opposite of node's direction (relative to parent). Now the close child takes sibling's place.
       rotateSubTree(sibling, static_cast<direction>(1 - dir));
       
@@ -332,16 +352,27 @@ void RedBlackTree::removeBalance(Node* node) {
     }
     
     //case 2: (if parent, sibling, and sibling's children are black) (req 4 violated)
-    if (sibling != nullptr &&
-	parent->color == BLACK &&
+
+    if (parent->color == BLACK &&
         getColor(sibling) == BLACK &&
         getColor(close_nephew) == BLACK &&
         getColor(far_nephew) == BLACK) {
       sibling->color = RED; //set sibling color to red
-      node = parent; //update the node pointer to become the parent (move up tree by one iteration)
+      Node* current = parent;
+      parent = parent->parent; //update parent for nexxt iteration
+      node = current; //move to parent
+
+
+      //update a direction for next iteration
+      if (parent != nullptr) {
+        dir = nodeDirection(current);
+      } else {
+        std::cout << "Parent is null" << std::endl;
+        return; //if parent is null we have reached the root.
+      }
     }
-    
-  } while (parent = node->parent); //update parent every iteration, will stop once parent is null
+  } while ((parent = node->parent)); //will stop once parent is null.
+  delete node; //delete the node that was removed. (free up memory?)
 }
 
 void RedBlackTree::print(const Node* pos , const int depth, bool isRight) {
@@ -369,7 +400,7 @@ void RedBlackTree::print(const Node* pos , const int depth, bool isRight) {
   print(pos->left, depth + 1, false); //print out left of tree
 }
 
-Node* RedBlackTree::getNode(Node* pos, int data) {
+Node* RedBlackTree::getNode(Node* pos, const int data) {
   // Implementation for getting a node
   
   if (pos->data == data) {
