@@ -113,7 +113,7 @@ public:
  * @brief Removes a node from the Red-Black tree
  * @param toRemove The node to be removed
  */
-    void remove(Node* toRemove);
+    void remove(const Node* toRemove);
 
     /**
  * @brief Rebalances the tree after removal to maintain Red-Black properties

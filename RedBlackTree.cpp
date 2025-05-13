@@ -1,7 +1,6 @@
 #include "RedBlackTree.h"
 #include <iostream>
 
-// Corrected constructor name
 RedBlackTree::RedBlackTree() = default;
 
 
@@ -202,13 +201,88 @@ void RedBlackTree::insertBalance(Node* node, direction dir) {
 
     //case 3 (if case 2 has happened enough for height to increase) then every requirement is met (we can basically exit function)
 
-    root->color = BLACK; //make sure root is black (wasn't always set befoer)
+    root->color = BLACK; //make sure root is black
 }
 
 //remove traversal (add some memory cleanup)
-void RedBlackTree::remove(Node* toRemove) {
-/*
-// Had some issues with balancing (original color didn't save, broke req 4
+void RedBlackTree::remove(const Node* toRemove) {
+    if (toRemove == nullptr) return;
+
+    Node* x = nullptr;             // Replacement node
+    Node* xParent = nullptr;       // Parent of replacement node
+    Color originalColor = toRemove->color;
+
+    // Case 1: node to remove has at one child
+    if (toRemove->left == nullptr || toRemove->right == nullptr) {
+        if (toRemove->left != nullptr) { //if it has left child
+            x = toRemove->left;
+        } else { //if it has right child
+            x = toRemove->right;
+        }
+        xParent = toRemove->parent;
+
+        // Replace toRemove with its child
+        transplant(toRemove, x);
+    }
+    // Case 2: has two children (replace with in order successor)
+    else {
+        // Find the in order successor (minimum of right subtree)
+        Node* y = tree_min(toRemove->right);
+        originalColor = y->color;
+        x = y->right;
+
+        //if the successor is a direct child, track it as the parent of x.
+        if (y->parent == toRemove) { //if the successor is a direct child
+            xParent = y;
+            if (x != nullptr)
+                x->parent = y;
+        }
+        else { //if the successor is not the direct child, remove it from its position and put it as the right subtree of the node being removed.
+            xParent = y->parent; //keep track of the original parent
+            transplant(y, y->right); //replace y with its right child
+            y->right = toRemove->right; //y's right child is now the toRemove node's right.
+            if (y->right != nullptr) { //update the right of y subtree (the nodes following y)
+                y->right->parent = y;
+            }
+        }
+
+        // Finally, Replace toRemove with y
+        transplant(toRemove, y);
+        y->left = toRemove->left;
+        if (y->left != nullptr)
+            y->left->parent = y; //update the left of y subtree (the nodes before y)
+        y->color = toRemove->color;
+    }
+
+    // Fix Red-Black properties if removed a black node
+    if (originalColor == BLACK) {
+        // Handle case of no children and being black with a temporary node
+        if (x == nullptr && xParent != nullptr) { //the replacement node doesn't exist, meaning toRemove was a leaf node with no children (and it wasn't the root).
+            Node tempNode(0); //make a temp node that represents the removed node.
+            tempNode.color = BLACK;
+            tempNode.parent = xParent;
+
+            // Determine which side the deleted node was on
+            const direction dir = (xParent->left == nullptr) ? left : right;
+            xParent->setChild(dir, &tempNode); //set the temp node to that position.
+
+            removeBalance(&tempNode); //balance the case.
+
+            // Cleanup temp node
+            if (tempNode.parent) {
+                if (tempNode.parent->left == &tempNode)
+                    tempNode.parent->left = nullptr;
+                else
+                    tempNode.parent->right = nullptr;
+            }
+        }
+        else if (x != nullptr) { //else just do the balancing (temp node not needed to represent the null deleted node).
+            removeBalance(x);
+        }
+    }
+    delete toRemove; //free up memory
+    /*
+// Had some issues with balancing (original color didn't save, broke req 4) old code.
     //Simple cases:
     Node* z = toRemove;
     //Color original_color = z->color;
@@ -251,82 +325,6 @@ void RedBlackTree::remove(Node* toRemove) {
             delete N;
         }
     } */
-
-
-    if (toRemove == nullptr) return;
-
-    Node* x = nullptr;             // Replacement node
-    Node* xParent = nullptr;       // Parent of replacement node
-    Color originalColor = toRemove->color;
-
-    // Case 1: Z has at one child
-    if (toRemove->left == nullptr || toRemove->right == nullptr) {
-        if (toRemove->left != nullptr) { //if has left child
-            x = toRemove->left;
-        } else { //if has right child
-            x = toRemove->right;
-        }
-        xParent = toRemove->parent;
-
-        // Replace toRemove with its child
-        transplant(toRemove, x);
-    }
-    // Case 2: has two children
-    else {
-        // Find successor (minimum of right subtree)
-        Node* y = tree_min(toRemove->right);
-        originalColor = y->color;
-        x = y->right;
-
-        //if succesor is direct child, track it as the parent of x (replacement node)
-        if (y->parent == toRemove) { //if sucessor is a direct child
-            xParent = y;
-            if (x != nullptr) x->parent = y;
-        }
-        else { //if the successor is not the direct child, remove it from it's position and put it as the right subtree as the node being removed.
-            // Successor further down
-            xParent = y->parent; //keep track of original parent
-            transplant(y, y->right); //replace y with its right child
-            y->right = toRemove->right; //y's right child is now toRemove's right child
-            if (y->right != nullptr) {
-                y->right->parent = y;
-            }
-        }
-
-        // Replace toRemove with y
-        transplant(toRemove, y);
-        y->left = toRemove->left;
-        if (y->left) y->left->parent = y;
-        y->color = toRemove->color;
-    }
-
-    // Fix Red-Black properties if removed a black node
-    if (originalColor == BLACK) {
-        // Handle case of null child (the deleted node had no children and was black) with a temporary node
-        if (x == nullptr && xParent != nullptr) {
-            Node tempNode(0);
-            tempNode.color = BLACK;
-            tempNode.parent = xParent;
-
-            // Determine which side the deleted node was on
-            const direction dir = (xParent->left == nullptr) ? left : right;
-            xParent->setChild(dir, &tempNode);
-
-            removeBalance(&tempNode);
-
-            // Cleanup temp node
-            if (tempNode.parent) {
-                if (tempNode.parent->left == &tempNode)
-                    tempNode.parent->left = nullptr;
-                else
-                    tempNode.parent->right = nullptr;
-            }
-        }
-        else if (x != nullptr) {
-            removeBalance(x);
-        }
-    }
-    delete toRemove;
 }
 
 //add some memory cleanup
@@ -369,22 +367,20 @@ void RedBlackTree::removeBalance(const Node* node) {
             far_nephew = nullptr;
         }
 
-        //Handle case where silbing is nullptr (working on) (I think this fixed the problem?)
+        //Handle case where sibling is nullptr (move up the tree by 1 if this is the case)
         if (sibling == nullptr) {
-            //Then this is an unbalance state, go move up the tre
-            Node* current = parent;
+            //Then this is an unbalance state, go move up the tree
+            const Node* current = parent;
             parent = parent->parent;
 
             if (parent == nullptr) {
                 return; //if parent is null we have reached the root.
             }
 
-            //now update a direction for next iteration.
+            //now update a direction for the next iteration.
             dir = nodeDirection(current);
-            continue; //skip to the next iteration of the loop (ignore following cases)
+            continue; //skip to the next iteration of the loop (ignore the following cases)
         }
-
-        //Note: recall that null can also be black (optimize for this, without having such long if statements maybe...)
 
         //Case 3: (sibling is red, so nephews and parent must be black). This rotates the tree so that it can be fixed in cases 4,5, or 6
         if (getColor(sibling) == RED) {
