@@ -402,7 +402,10 @@ void RedBlackTree::print(const Node* pos , const int depth, bool isRight) {
 
 Node* RedBlackTree::getNode(Node* pos, const int data) {
   // Implementation for getting a node
-  
+  if (pos == nullptr) {
+    return nullptr;
+  }
+
   if (pos->data == data) {
     return pos;
   }
