@@ -299,7 +299,7 @@ void RedBlackTree::removeBalance(Node* node) {
 
       //now update a direction for next iteration.
       dir = nodeDirection(current);
-      continue;
+      continue; //skip to the next iteration of the loop (ignore following cases)
     }
     
     //Note: recall that null can also be black (optimize for this, without having such long if statements maybe...)
