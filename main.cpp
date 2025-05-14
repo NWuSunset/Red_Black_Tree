@@ -15,14 +15,14 @@ using namespace std;
 bool userSelection(RedBlackTree* rbt);
 
 /*!
-  @brief Reads in numbers (separated by spaces) from a file and inserts them into binary tree
-  @param rbt       the binary search tree
+  @brief Reads in numbers (separated by spaces) from a file and inserts them into the tree
+  @param rbt       the red black tree object
   @note can take in a file path or the name of a file in the local directory e.g. "C:\Users\476275\Downloads\numbers.txt", numbers.txt (if file is in the local program directory).
  */
 void fromFile(RedBlackTree* rbt);
 
 /*!
-  @brief Reads in numbers (separated by spaces) from the console and inserts them into binary tree
+  @brief Reads in numbers (separated by spaces) from the console and inserts them into the tree
   @param rbt       the red black tree
  */
 
@@ -70,7 +70,7 @@ bool userSelection(RedBlackTree* rbt) {
         cin >> num;
 
         //get the node that matches user input
-        Node* n = rbt->getNode(rbt->root, num);
+        const Node* n = RedBlackTree::getNode(rbt->root, num);
         if (n != nullptr) {
             rbt->remove(n);
         } else {
@@ -81,7 +81,7 @@ bool userSelection(RedBlackTree* rbt) {
         int num;
         cout << "What number do you want to search for in the tree?" << endl;
         cin >> num;
-        if (rbt->getNode(rbt->root, num) != nullptr) {
+        if (RedBlackTree::getNode(rbt->root, num) != nullptr) {
             cout << "It is in the tree" << endl;
         } else {
             cout << "This number isn't in the tree" << endl;
