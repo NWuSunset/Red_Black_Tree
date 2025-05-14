@@ -84,7 +84,7 @@ public:
  * @param u The subtree to be replaced
  * @param v The subtree that replaces u
  */
-    void transplant(const Node* u, Node* v);
+    void transplant(Node *u, Node *v);
 
     /**
  * @brief Finds the minimum value (in order successor) node in a subtree
