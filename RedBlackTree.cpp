@@ -205,15 +205,27 @@ void RedBlackTree::insertBalance(Node* node, direction dir) {
 void RedBlackTree::remove(Node* toRemove) {
     if (toRemove == nullptr) return;
 
+
     Node* x = nullptr;             // Replacement node
+    Node* y = nullptr;             // In order successor
     Node* xParent = nullptr;       // Parent of replacement node
     Color originalColor = toRemove->color;
+
+    /*
+    bool isSuccessorCase = false;  // Flag to track successor cases
+
+    // Remember which child of parent this is (only for non-root nodes)
+    direction original_dir = right; // Default value doesn't matter
+    bool isNotRoot = toRemove->parent != nullptr;
+    if (isNotRoot) { //if it's not the root
+        original_dir = nodeDirection(toRemove);
+    } */
 
     // Case 1: node to remove has at one child
     if (toRemove->left == nullptr || toRemove->right == nullptr) {
         if (toRemove->left != nullptr) { //if it has left child
             x = toRemove->left;
-        } else { //if it has right child
+        } else { //if it has right child (or no children)
             x = toRemove->right;
         }
         xParent = toRemove->parent;
@@ -223,8 +235,9 @@ void RedBlackTree::remove(Node* toRemove) {
     }
     // Case 2: has two children (replace with in order successor)
     else {
+        //isSuccessorCase = true;  // Mark as successor case
         // Find the in order successor (minimum of right subtree)
-        Node* y = tree_min(toRemove->right);
+        y = tree_min(toRemove->right);
         originalColor = y->color;
         x = y->right;
 
@@ -236,6 +249,7 @@ void RedBlackTree::remove(Node* toRemove) {
         }
         else { //if the successor is not the direct child, remove it from its position and put it as the right subtree of the node being removed.
             xParent = y->parent; //keep track of the original parent
+            //original_dir = right; //update the direction of the original parent (sucessor child is always on the right side)
             transplant(y, y->right); //replace y with its right child
             y->right = toRemove->right; //y's right child is now the toRemove node's right.
             if (y->right != nullptr) { //update the right of y subtree (the nodes following y)
@@ -259,19 +273,29 @@ void RedBlackTree::remove(Node* toRemove) {
             tempNode.color = BLACK;
             tempNode.parent = xParent;
 
-            // Determine which side the deleted node was on
-            const direction dir = (xParent->left == nullptr) ? left : right;
-            xParent->setChild(dir, &tempNode); //set the temp node to that position.
+            /* remember to check if successor case and also the root
+            if (isSuccessorCase) { //if successor case then the node direction would change from the original
+                // For successor cases, temp node always goes on the right
+                xParent->setChild(right, &tempNode);
+            } else if (isNotRoot) {
+                xParent->setChild(original_dir, &tempNode);
+            } else {
+                // Root case handling
+                if (xParent->left == nullptr) {
+                    xParent->setChild(left, &tempNode);
+                } else {
+                    xParent->setChild(right, &tempNode);
+                }
+            } */
+
+            // check which child position is null and place the temp node there (check if this could break)
+            if (xParent->left == nullptr) {
+                xParent->setChild(left, &tempNode);
+            } else {
+                xParent->setChild(right, &tempNode);
+            }
 
             removeBalance(&tempNode); //balance the case.
-
-            // Cleanup temp node
-            if (tempNode.parent != nullptr) {
-                if (tempNode.parent->left == &tempNode)
-                    tempNode.parent->left = nullptr;
-                else
-                    tempNode.parent->right = nullptr;
-            }
         }
         else if (x != nullptr) { //else just do the balancing (temp node not needed to represent the null deleted node).
             removeBalance(x);
@@ -336,7 +360,7 @@ void RedBlackTree::removeBalance(const Node* node) {
 
     if (parent != nullptr) {
         dir = nodeDirection(node);
-        parent->setChild(dir, nullptr); //set the parent's child pointer to null now.
+        parent->setChild(dir, nullptr); //we can set the parent's child pointer to null now.
     }
 
     //now do the balancing

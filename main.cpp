@@ -70,7 +70,7 @@ bool userSelection(RedBlackTree* rbt) {
         cin >> num;
 
         //get the node that matches user input
-        const Node* n = RedBlackTree::getNode(rbt->root, num);
+        Node* n = RedBlackTree::getNode(rbt->root, num);
         if (n != nullptr) {
             rbt->remove(n);
         } else {
