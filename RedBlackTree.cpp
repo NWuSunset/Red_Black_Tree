@@ -91,7 +91,6 @@ Node* RedBlackTree::tree_min(Node* node) {
 
 //position initially is the root, prev is initially nullptr
 
-//insert function broken (misses 3 when addding?)
 void RedBlackTree::insert(Node* & pos, Node* prev, const int data, const direction dir) {
     if (pos == nullptr) {
         pos = new Node(data); //this will be the base case of the recursion (will insert once the path has ended)
@@ -203,7 +202,7 @@ void RedBlackTree::insertBalance(Node* node, direction dir) {
 }
 
 //remove traversal (add some memory cleanup)
-void RedBlackTree::remove(const Node* toRemove) {
+void RedBlackTree::remove(Node* toRemove) {
     if (toRemove == nullptr) return;
 
     Node* x = nullptr;             // Replacement node
@@ -267,7 +266,7 @@ void RedBlackTree::remove(const Node* toRemove) {
             removeBalance(&tempNode); //balance the case.
 
             // Cleanup temp node
-            if (tempNode.parent) {
+            if (tempNode.parent != nullptr) {
                 if (tempNode.parent->left == &tempNode)
                     tempNode.parent->left = nullptr;
                 else
@@ -497,7 +496,7 @@ Node* RedBlackTree::getNode(Node* pos, const int data) {
 }
 
 // Helper method to recursively delete nodes
-void RedBlackTree::deleteSubtree(const Node* node) {
+void RedBlackTree::deleteSubtree(Node* node) {
     if (node == nullptr) {
         return;
     }

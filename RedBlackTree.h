@@ -113,7 +113,7 @@ public:
  * @brief Removes a node from the Red-Black tree
  * @param toRemove The node to be removed
  */
-    void remove(const Node* toRemove);
+    void remove(Node *toRemove);
 
     /**
  * @brief Rebalances the tree after removal to maintain Red-Black properties
@@ -142,7 +142,7 @@ public:
      * @brief Recursively deletes all nodes in a subtree.
      * @param node The root of the subtree to delete.
      */
-    void deleteSubtree(const Node* node);
+    void deleteSubtree(Node *node);
 
     ~RedBlackTree(); //destructor
 
