@@ -3,6 +3,15 @@
 
 RedBlackTree::RedBlackTree() = default;
 
+    /*
+     * Requirements:
+     *  1 Every node is either red or black
+     *  2 All null nodes  are considered black.
+     *  3 A red node does not have a red child.
+     *  4 Every path from a given node to any of its leaf nodes goes through the same number of black nodes.
+     *  (Conclusion) If a node N has exactly one child, the child must be red, because if it were black, its leaves would sit at a di\
+fferent black depth than N's child, violating requirement 4.
+     */
 
 //https://en.wikipedia.org/wiki/Tree_rotation visualization
 //node passed in is the root of the subtree (perhaps rename a later
@@ -64,9 +73,9 @@ Color RedBlackTree::getColor(const Node* node) {
 
 //u is the node to be swapped, and v is the node to swap with
 void RedBlackTree::transplant(const Node* u, Node* v) {
-    if (u->parent == nullptr) {
-        //if root
-        //u is root
+  v->color = u->color;
+  if (u->parent == nullptr) {
+        //if u is root
         root = v;
     } else {
         const direction dir = nodeDirection(u); //u's direction relative to parent
@@ -232,6 +241,7 @@ void RedBlackTree::remove(Node* toRemove) {
 
         // Replace toRemove with its child
         transplant(toRemove, x);
+	//	return;
     }
     // Case 2: has two children (replace with in order successor)
     else {
@@ -241,22 +251,22 @@ void RedBlackTree::remove(Node* toRemove) {
         originalColor = y->color;
         x = y->right;
 
-        //if the successor is a direct child, track it as the parent of x.
+        //if the successor is a direct child, track it as the parent of x (since y will become the node to be removed).
         if (y->parent == toRemove) { //if the successor is a direct child
             xParent = y;
             if (x != nullptr)
                 x->parent = y;
         }
         else { //if the successor is not the direct child, remove it from its position and put it as the right subtree of the node being removed.
-            xParent = y->parent; //keep track of the original parent
-            //original_dir = right; //update the direction of the original parent (sucessor child is always on the right side)
-            transplant(y, y->right); //replace y with its right child
-            y->right = toRemove->right; //y's right child is now the toRemove node's right.
-            if (y->right != nullptr) { //update the right of y subtree (the nodes following y)
-                y->right->parent = y;
-            }
+	  xParent = y->parent; //update xParent, since y will be the node to be replaced by x now.
+	  //original_dir = right; //update the direction of the original parent (sucessor child is always on the right side)
+	  transplant(y, y->right); //replace y with its right child
+	  y->right = toRemove->right; //y's right child is now the toRemove node's right.
+	  if (y->right != nullptr) { //update the right of y subtree (the nodes following y)
+	    y->right->parent = y;
+	  }
         }
-
+	
         // Finally, Replace toRemove with y
         transplant(toRemove, y);
         y->left = toRemove->left;
