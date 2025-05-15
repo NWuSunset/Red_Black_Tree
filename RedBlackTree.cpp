@@ -281,10 +281,7 @@ void RedBlackTree::remove(Node* toRemove) {
                 xParent->setChild(right, &tempNode);
             }
             removeBalance(&tempNode); //balance the case.
-        } /*else if (x != nullptr) {
-            //in the case that the successor (which was black) is moved.
-            removeBalance(x); //balance the case.
-        } */
+        }
     }
     delete toRemove; //free up memory
 }
