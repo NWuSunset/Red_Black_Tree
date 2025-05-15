@@ -73,6 +73,7 @@ bool userSelection(RedBlackTree* rbt) {
         Node* n = RedBlackTree::getNode(rbt->root, num);
         if (n != nullptr) {
             rbt->remove(n);
+            rbt->checkTree();
         } else {
             cout << "Invalid number" << endl;
         }
@@ -118,6 +119,7 @@ void fromFile(RedBlackTree* rbt) {
             //      rbt->print(rbt->root);
             //cout << endl;
         }
+        rbt->checkTree();
         inputFile.close();
     } else {
         cout << "Cannot find file specified" << endl;
@@ -139,4 +141,5 @@ void fromConsole(RedBlackTree* rbt) {
     while (iss >> num) {
         rbt->insert(rbt->root, nullptr, num); //num == rbt->root->data will give 1 if true (will go right)
     }
+    rbt->checkTree();
 }

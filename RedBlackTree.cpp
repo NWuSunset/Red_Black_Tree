@@ -73,7 +73,7 @@ Color RedBlackTree::getColor(const Node* node) {
 
 //u is the node to be swapped, and v is the node to swap with
 void RedBlackTree::transplant(Node* u, Node* v) {
-  if (u->parent == nullptr) {
+    if (u->parent == nullptr) {
         //if u is root
         root = v;
     } else {
@@ -203,16 +203,19 @@ void RedBlackTree::insertBalance(Node* node, direction dir) {
 void RedBlackTree::remove(Node* toRemove) {
     if (toRemove == nullptr) return;
 
-    Node* x = nullptr;             // Replacement node
-    Node* y = nullptr;             // In order successor
-    Node* xParent = nullptr;       // Parent of replacement node
+    Node* x = nullptr; // Replacement node
+    Node* y = nullptr; // In order successor
+    Node* xParent = nullptr; // Parent of replacement node
     Color originalColor = toRemove->color;
+
 
     // Case 1: node to remove has at one child (swap with it's only child)
     if (toRemove->left == nullptr || toRemove->right == nullptr) {
-        if (toRemove->left != nullptr) { //if it has left child
+        if (toRemove->left != nullptr) {
+            //if it has left child
             x = toRemove->left;
-        } else { //if it has right child (or no children)
+        } else {
+            //if it has right child (or no children)
             x = toRemove->right;
         }
         xParent = toRemove->parent;
@@ -221,9 +224,8 @@ void RedBlackTree::remove(Node* toRemove) {
         transplant(toRemove, x);
 
         if (x != nullptr) {
-            x->color = BLACK; //switch color to black (switching color to red should never happen).
+             x->color = BLACK; //switch color to black (switching color to red should never happen).
         }
-
     }
     // Case 2: has two children (replace with in order successor)
     else {
@@ -233,33 +235,41 @@ void RedBlackTree::remove(Node* toRemove) {
         x = y->right;
 
         //if the successor is a direct child, track it as the parent of x (since y will become the node to be removed).
-        if (y->parent == toRemove) { //if the successor is a direct child
+        if (y->parent == toRemove) {
+            //if the successor is a direct child
             xParent = y;
             if (x != nullptr)
                 x->parent = y;
+        } else {
+
+            //if the successor is not the direct child, remove it from its position and put it as the right subtree of the node being removed.
+            xParent = y->parent; //update xParent, since y will be the node to be replaced by x now.
+            //original_dir = right; //update the direction of the original parent (sucessor child is always on the right side)
+            transplant(y, y->right); //replace y with its right child
+            y->right = toRemove->right; //y's right child is now the toRemove node's right.
+            if (y->right != nullptr) {
+                //update the right of y subtree (the nodes following y)
+                y->right->parent = y;
+            }
         }
-        else { //if the successor is not the direct child, remove it from its position and put it as the right subtree of the node being removed.
-	        xParent = y->parent; //update xParent, since y will be the node to be replaced by x now.
-	        //original_dir = right; //update the direction of the original parent (sucessor child is always on the right side)
-	         transplant(y, y->right); //replace y with its right child
-	        y->right = toRemove->right; //y's right child is now the toRemove node's right.
-	        if (y->right != nullptr) { //update the right of y subtree (the nodes following y)
-	            y->right->parent = y;
-	        }
-        }
-	
+
         // Finally, Replace toRemove with y
         transplant(toRemove, y);
         y->left = toRemove->left;
         if (y->left != nullptr)
             y->left->parent = y; //update the left of y subtree (the nodes before y)
         y->color = toRemove->color;
+
+        if (x != nullptr && originalColor == BLACK) { //special case. where the in order successor has a non null right child
+            removeBalance(x);
+        }
     }
 
     // Fix Red-Black properties if removed a black node
     if (originalColor == BLACK) {
         // Handle case of no children and being black with a temporary node
-        if (x == nullptr && xParent != nullptr) { //the replacement node doesn't exist, meaning toRemove was a leaf node with no children (and it wasn't the root).
+        if (x == nullptr && xParent != nullptr) {
+            //the replacement node doesn't exist, meaning toRemove was a leaf node with no children (and it wasn't the root).
             Node tempNode(0); //make a temp node that represents the removed node.
             tempNode.color = BLACK;
             tempNode.parent = xParent;
@@ -271,7 +281,10 @@ void RedBlackTree::remove(Node* toRemove) {
                 xParent->setChild(right, &tempNode);
             }
             removeBalance(&tempNode); //balance the case.
-        }
+        } /*else if (x != nullptr) {
+            //in the case that the successor (which was black) is moved.
+            removeBalance(x); //balance the case.
+        } */
     }
     delete toRemove; //free up memory
 }
@@ -286,9 +299,12 @@ void RedBlackTree::removeBalance(const Node* node) {
     Node* far_nephew = nullptr;
     direction dir = right; //default direction to right
 
+    //Check if the node we passed in was the temporary node.
+    bool isTemp = (node->data == 0 && node->left == nullptr && node->right == nullptr);
+
     if (parent != nullptr) {
         dir = nodeDirection(node);
-        parent->setChild(dir, nullptr); //we can set the parent's child pointer to null now.
+        parent->setChild(dir, nullptr);
     }
 
     //now do the balancing
@@ -332,12 +348,12 @@ void RedBlackTree::removeBalance(const Node* node) {
 
         //Case 3: (sibling is red, so nephews and parent must be black). This rotates the tree so that it can be fixed in cases 4,5, or 6
         if (getColor(sibling) == RED) {
-           // std::cout << "Red sibling (case 3)" << std::endl;
             //(if node is left of parent rotate left, if it's right, do the opposite)
             rotateSubTree(parent, dir); //rotate so that the sibling becomes the new parent (or node's grandparent now)
             parent->color = RED;
             sibling->color = BLACK;
-            sibling = close_nephew; //update the sibling pointer (since original sibling isn't actually the sibling anymore)
+            sibling = close_nephew;
+            //update the sibling pointer (since original sibling isn't actually the sibling anymore)
 
             //update close and far nephews.
             close_nephew = sibling->child(dir);
@@ -345,9 +361,9 @@ void RedBlackTree::removeBalance(const Node* node) {
         }
 
         //Case 4: Sibling and it's children are black, but parent is red (check for null sibling, as that has no children)
-        if (getColor(sibling) == BLACK && getColor(sibling->right) == BLACK && getColor(sibling->left) == BLACK && parent->
+        if (getColor(sibling) == BLACK && getColor(sibling->right) == BLACK && getColor(sibling->left) == BLACK &&
+            parent->
             color == RED) {
-           // std::cout << "Black sibling and children (case 4)" << std::endl;
             parent->color = BLACK;
             //switching the colors will add one to the # of black nodes through 'node's' path (since it's parent will now be black), which makes up for the deleted black nodes without altering the # of black nodes through sibling's path.
             sibling->color = RED;
@@ -357,7 +373,6 @@ void RedBlackTree::removeBalance(const Node* node) {
 
         //Case 5: Sibling is black, the close child is red, the far child is black.
         if (getColor(sibling) == BLACK && getColor(close_nephew) == RED && getColor(far_nephew) == BLACK) {
-            //std::cout << "Black sibling, close child, black far child (case 5)" << std::endl;
             //Rotate sibling opposite of node's direction (relative to parent). Now the close child takes sibling's place.
             rotateSubTree(sibling, static_cast<direction>(1 - dir));
 
@@ -371,7 +386,6 @@ void RedBlackTree::removeBalance(const Node* node) {
 
         //Case 6: sibling is black, and it's far child (node's far nephew) is red
         if (getColor(sibling) == BLACK && getColor(far_nephew) == RED) {
-            //std::cout << "Black sibling, far child red (case 6)" << std::endl;
             rotateSubTree(parent, dir); //rotate parent so that the sibling is now in its original position
 
             //swap the parent and sibling colors (only happens if parent would be red)
@@ -387,12 +401,10 @@ void RedBlackTree::removeBalance(const Node* node) {
         }
 
         //case 2: (if parent, sibling, and sibling's children are black) (req 4 violated)
-
         if (parent->color == BLACK &&
             getColor(sibling) == BLACK &&
             getColor(sibling->left) == BLACK &&
             getColor(sibling->right) == BLACK) {
-            std::cout << "Black parent, sibling, and children (case 2)" << std::endl;
             sibling->color = RED; //set sibling color to red
             const Node* current = parent;
             parent = parent->parent; //update parent for nexxt iteration
@@ -407,7 +419,8 @@ void RedBlackTree::removeBalance(const Node* node) {
             }
         }
     }
-    while ((parent = node->parent)); //will stop once parent is null. (also updates parent to move up the tree every iteration)
+    while ((parent = node->parent));
+    //will stop once parent is null. (also updates parent to move up the tree every iteration)
 }
 
 void RedBlackTree::print(const Node* pos, const int depth, const bool isRight) {
@@ -450,11 +463,78 @@ Node* RedBlackTree::getNode(Node* pos, const int data) {
     if (pos->data < data) {
         return getNode(pos->right, data);
     } else if (pos->data > data) {
-        //If data is less than node go left
+        //If data is less than the node go left
         return getNode(pos->left, data);
     }
     return nullptr;
 }
+
+
+//Checks tree properties (last minute addition for testing), (i don't think this always works also....)
+//sourced from: https://stackoverflow.com/questions/70293161/function-that-verifies-the-validity-of-the-red-black-tree
+unsigned int RedBlackTree::checkTreeProperties(Node* parent, Node* node) {
+    unsigned int left_black_height = 0;
+    unsigned int right_black_height = 0;
+
+    if (node == nullptr) {
+        return 1; // Null nodes are considered black
+    }
+
+    // Check parent-child relationship
+    if (node->parent != parent) {
+        std::cout << "Node " << node->data << " has wrong parent" << std::endl;
+    }
+
+    // Add black node to height count
+    if (node->color == BLACK) {
+        left_black_height++;
+        right_black_height++;
+    } else if (node->color != RED) {
+        std::cout << "Node " << node->data << " has invalid color" << std::endl;
+    }
+
+    // Check red-red violation
+    if (node->color == RED && node->parent != nullptr && node->parent->color == RED) {
+        std::cout << "RED-RED violation: Node " << node->data
+            << " and parent " << node->parent->data << std::endl;
+    }
+
+    // Recursively check subtrees
+    left_black_height += checkTreeProperties(node, node->left);
+    right_black_height += checkTreeProperties(node, node->right);
+
+    // Check black-height balance
+    if (left_black_height != right_black_height) {
+        std::cout << "Node " << node->data << " unbalanced ("
+            << left_black_height << ", " << right_black_height << ")" << std::endl;
+    }
+
+    return std::max(left_black_height, right_black_height);
+}
+
+//Check Tree function, uses checkTreeProperties
+void RedBlackTree::checkTree() {
+    if (root == nullptr) {
+        std::cout << "Tree is empty" << std::endl;
+        return;
+    }
+
+    // Check if root is black
+    if (root->color != BLACK) {
+        std::cout << "Root " << root->data << " is not BLACK" << std::endl;
+    }
+
+    // Check both subtrees
+    unsigned int leftHeight = checkTreeProperties(root, root->left);
+    unsigned int rightHeight = checkTreeProperties(root, root->right);
+
+    if (leftHeight != rightHeight) {
+        std::cout << "Root subtrees have different black heights" << std::endl;
+    } else {
+        std::cout << "Tree passes RBT validation with black height: " << leftHeight << std::endl;
+    }
+}
+
 
 // Helper method to recursively delete nodes
 void RedBlackTree::deleteSubtree(Node* node) {

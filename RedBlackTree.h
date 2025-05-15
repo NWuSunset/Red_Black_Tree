@@ -57,6 +57,9 @@ class RedBlackTree {
 public:
     RedBlackTree();
 
+    // Existing methods...
+    void checkTree(); // Public method to validate tree properties
+
     /**
  * @brief Rotates a subtree around a pivot node in the specified direction
  * @param subRoot The root of the subtree to rotate
@@ -148,6 +151,9 @@ public:
 
 
     Node* root = nullptr; //root of tree
+
+private:
+    unsigned int checkTreeProperties(Node* parent, Node* node);
 };
 
 #endif
