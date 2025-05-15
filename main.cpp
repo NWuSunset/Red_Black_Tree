@@ -4,7 +4,7 @@
 #include <cstring>
 #include <limits>
 #include "RedBlackTree.h"
-
+#include "TestRedBlackTree.h"
 
 using namespace std;
 /*!
@@ -46,7 +46,7 @@ int main() {
 bool userSelection(RedBlackTree* rbt) {
     char userInput[12];
     cout <<
-        "Type CONSOLE to enter a series of numbers in the console. Or type FILE to enter a file name. Type PRINT to print out the tree. Type 'remove' to remove a number from the tree. Type SEARCH to search for a number in the tree."
+        "Type CONSOLE to enter a series of numbers in the console. Or type FILE to enter a file name. Type PRINT to print out the tree. Type 'remove' to remove a number from the tree. Type SEARCH to search for a number in the tree. Type TEST to test the tree's functions"
         << endl;
     cin.getline(userInput, 12);
 
@@ -73,7 +73,7 @@ bool userSelection(RedBlackTree* rbt) {
         Node* n = RedBlackTree::getNode(rbt->root, num);
         if (n != nullptr) {
             rbt->remove(n);
-            rbt->checkTree();
+            //rbt->checkTree();
         } else {
             cout << "Invalid number" << endl;
         }
@@ -88,7 +88,12 @@ bool userSelection(RedBlackTree* rbt) {
             cout << "This number isn't in the tree" << endl;
         }
         cin.ignore();
-    } else if (strcasecmp(userInput, "QUIT") == 0) {
+    } else if (strcasecmp(userInput, "TEST") == 0) { //tests red black tree cases.
+        // Run comprehensive tests
+        cout << "Running comprehensive Red-Black Tree tests..." << endl;
+        testRedBlackTree();
+    }
+    else if (strcasecmp(userInput, "QUIT") == 0) {
         return true;
     } else {
         cout << "Invalid input." << endl;
@@ -119,7 +124,7 @@ void fromFile(RedBlackTree* rbt) {
             //      rbt->print(rbt->root);
             //cout << endl;
         }
-        rbt->checkTree();
+        //rbt->checkTree();
         inputFile.close();
     } else {
         cout << "Cannot find file specified" << endl;
